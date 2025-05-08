@@ -158,7 +158,17 @@ const config = {
 
   // // Plugin array (section)
   plugins: [
-    path.join(__dirname, '/plugins/feedback-plugin')
+    [
+      // Not really sure what this does (references plugin?)
+      path.join(__dirname, '/plugins/feedback-plugin'),
+      // The 'options' parameter in the plugin
+      {
+        settings: 'some1settings',
+        api: 'some2api',
+        keys: 'inifitium-keys4',
+        id: 'your4mom',
+      }
+    ]
   ],
 };
 
