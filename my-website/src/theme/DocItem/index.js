@@ -1,6 +1,7 @@
-// Import necessary React hooks and the default DocItem component from Docusaurus
+// Import React hooks 
 import React, { useEffect, useState } from 'react';
-import DocItem from '@theme-original/DocItem'; // Docusaurus' original documentation item renderer
+// Import default Docusaurus DocItem component
+import DocItem from '@theme-original/DocItem'; // Item renderer (Docusaurus)
 
 // FeedbackWidget is a floating UI component that shows feedback options for selected text
 function FeedbackWidget({ selectedText, position }) {
@@ -18,10 +19,9 @@ function FeedbackWidget({ selectedText, position }) {
 
   // Handle the user clicking the 'Yes' button
   const handleEnter = () => {
-    // This is where you'd send feedback to an API or backend
-    console.log('Feedback submitted for:', selectedText);
+    // Sending of feedback
     const feedback = document.getElementById("feedback").value;
-    console.log('Feedback: ', feedback);
+    console.log('Feedback:',feedback, '\nSubmitted for:', selectedText);
     setVisible(false); // Hide widget after clicking
   };
 
@@ -48,7 +48,7 @@ function FeedbackWidget({ selectedText, position }) {
     color: 'black',
   };
 
-  // Render the widget with selected text and a submit button
+  // Render the widget with selected text, input, and buttons
   return (
     <div style={style}>
       <p>Provide feedback for:</p>
