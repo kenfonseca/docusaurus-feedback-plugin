@@ -24,7 +24,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Feedback Plugin',
-      items: ['feedback-plugin-info/test'],
+      items: ['feedback-plugin-info/Resources'],
     },
   ],
   
