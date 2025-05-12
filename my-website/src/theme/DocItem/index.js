@@ -5,6 +5,7 @@ import DocItem from '@theme-original/DocItem'; // Docusaurus' original documenta
 // FeedbackWidget is a floating UI component that shows feedback options for selected text
 function FeedbackWidget({ selectedText, position }) {
   const [visible, setVisible] = useState(false); // Internal state to control widget visibility
+  let feedback = "";
 
   // When selectedText changes, decide whether to show the widget
   useEffect(() => {
@@ -15,15 +16,25 @@ function FeedbackWidget({ selectedText, position }) {
     }
   }, [selectedText]);
 
-  // Handle the user clicking the "Submit Feedback" button
-  const handleSubmit = () => {
+  // Handle the user clicking the 'Yes' button
+  const handleEnter = () => {
     // This is where you'd send feedback to an API or backend
     console.log('Feedback submitted for:', selectedText);
-    setVisible(false); // Hide widget after submission
+    const feedback = document.getElementById("feedback").value;
+    console.log('Feedback: ', feedback);
+    setVisible(false); // Hide widget after clicking
   };
 
+  // Handle the user clicking the 'No' button
+  const handleCancel = () => {
+    console.log('Canceled feedback');
+    setVisible(false); // Hide widget after clicking
+  }
+
   // If widget is not visible, return nothing (don't render)
-  if (!visible) return null;
+  if (!visible){
+    return null;
+  } 
 
   // Define CSS style for floating positioning of the widget near the text
   const style = {
@@ -34,13 +45,17 @@ function FeedbackWidget({ selectedText, position }) {
     border: '1px solid #ccc', // Light gray border
     padding: '10px', // Padding inside the box
     zIndex: 1000, // Make sure it appears above other elements
+    color: 'black',
   };
 
   // Render the widget with selected text and a submit button
   return (
     <div style={style}>
-      <p>Provide feedback for: "{selectedText}"</p>
-      <button onClick={handleSubmit}>Submit Feedback</button>
+      <p>Provide feedback for:</p>
+      <p>"{selectedText}"</p>
+      <input type="text" id="feedback" ></input>
+      <button onClick={handleEnter}>Enter</button>
+      <button onClick={handleCancel}>Cancel</button>
     </div>
   );
 }
@@ -63,7 +78,7 @@ export default function DocItemWrapper(props) {
         setSelectedText(text);
         setPosition({ x: rect.left + window.scrollX, y: rect.top + window.scrollY }); // Account for scroll
       } else {
-        setSelectedText(''); // Clear if no text selected
+        // setSelectedText(''); // Clear if no text selected
       }
     };
 
