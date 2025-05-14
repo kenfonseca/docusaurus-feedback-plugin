@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from 'react';
 // Import default Docusaurus DocItem component
 import DocItem from '@theme-original/DocItem'; // Item renderer (Docusaurus)
+// import initSqlJs from 'sql.js';]
 
 // FeedbackWidget is a floating UI component that shows feedback options for selected text
-function FeedbackWidget({ selectedText, position }) {
+function FeedbackWidget({ selectedText, position, feedbackArray, setFeedbackArray }) {
   const [visible, setVisible] = useState(false); // Internal state to control widget visibility
-  let feedback = "";
 
   // When selectedText changes, decide whether to show the widget
   useEffect(() => {
@@ -17,11 +17,21 @@ function FeedbackWidget({ selectedText, position }) {
     }
   }, [selectedText]);
 
-  // Handle the user clicking the 'Yes' button
+  // Handle the user clicking the 'Enter' button
   const handleEnter = () => {
-    // Sending of feedback
+    // Pull feedback from user input
     const feedback = document.getElementById("feedback").value;
+    // Sending of feedback
     console.log('Feedback:',feedback, '\nSubmitted for:', selectedText);
+    // Insert feedback into array
+    let feedbackID = feedbackArray.length+1;
+    setFeedbackArray([...feedbackArray, { 
+      key: 'Feedback' + feedbackID, 
+      text: selectedText, 
+      feedback: feedback, 
+    }]);
+    // sql.js does not want to fucking work for some bullshit node module reason
+    // insertDb(selectedText, feedback);
     setVisible(false); // Hide widget after clicking
   };
 
@@ -62,6 +72,8 @@ function FeedbackWidget({ selectedText, position }) {
 
 // DocItemWrapper wraps each documentation page with feedback logic
 export default function DocItemWrapper(props) {
+  // Array to hold all feedback for display 
+  const [feedbackArray, setFeedbackArray] = useState([]);
   const [selectedText, setSelectedText] = useState(''); // Track currently selected text
   const [position, setPosition] = useState({ x: 0, y: 0 }); // Track position to display the widget
 
@@ -77,8 +89,6 @@ export default function DocItemWrapper(props) {
         // Save selected text and position to state
         setSelectedText(text);
         setPosition({ x: rect.left + window.scrollX, y: rect.top + window.scrollY }); // Account for scroll
-      } else {
-        // setSelectedText(''); // Clear if no text selected
       }
     };
 
@@ -95,7 +105,82 @@ export default function DocItemWrapper(props) {
   return (
     <>
       <DocItem {...props} /> {/* Render the default doc content */}
-      <FeedbackWidget selectedText={selectedText} position={position} /> {/* Conditionally show widget */}
+      <FeedbackWidget 
+        selectedText={selectedText} 
+        position={position} 
+        feedbackArray={feedbackArray}
+        setFeedbackArray={setFeedbackArray}
+      /> {/* Conditionally show widget */}
+      <div className="feedback-sidebar">
+        <DisplayFeedback feedbackArray={feedbackArray}/>
+      </div>
     </>
   );
+}
+
+// Takes all the feedback items in feedbackArray and displays them on the side
+function DisplayFeedback({feedbackArray}){
+  const style = {
+    position: 'fixed',
+    top: '100px',     // Adjust as needed
+    right: '20px',
+    width: '200px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    zIndex: 1000,
+  };
+
+  const buttonStyle = {
+    width: '100%',
+    padding: '8px',
+    border: 'none',
+    backgroundColor: '#eee',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  };
+
+  return (
+    <div style={style}>
+      <strong>Feedback List</strong>
+      {feedbackArray.map((item, index) => (
+        <button key={item.key || index} style={buttonStyle}>
+          <strong>{item.key}</strong><br />
+          Text: {item.text}<br />
+          Feedback: {item.feedback}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+
+// insertDb will take the parameter and properly format it to be inerted into a relational database
+async function insertDb(text, feedback){
+  // // Create SQL.js object
+  // const initSqlJs = require('sql.js');
+  const initSqlJs = window.initSqlJs;
+
+  // Locate the sql engine
+  const SQL = await initSqlJs({
+    // Required to load the wasm binary asynchronously
+    locateFile: file => `https://sql.js.org/dist/${file}`
+  });
+
+  // Create a database
+  const db = new SQL.Database();
+
+  // String to query creation and insertion for database table
+  sqlStr = "CREATE TABLE feedback (a int, b char, c char); \
+  INSERT INTO feedback VALUES (0, 'this should be the text', 'this should be the feedback');";
+  
+  // Run query
+  db.run(sqlStr);
+
+  // Prepare an sql statement
+  const stmt =db.prepare("SELECT * FROM feedback WHERE a=:aval");
+
+  // Bind values to the parameters and fetch the results of the query
+  const result = stmt.getAsObject({':aval' : 0});
+  console.log(result); 
 }
